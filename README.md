@@ -61,9 +61,9 @@ inventory node:
 Which will result in our actor moving from the Orders node to the
 inventory node:
 
-	+--------+      +-----------+
+        +--------+      +-----------+
         | Orders | ---> | Inventory |
-	+--------+      +-----------+
+        +--------+      +-----------+
 
 In the Inventory node, we'll check each order to see if they 
 are in the inventory, and if there are we'll spawn a new 
@@ -82,13 +82,13 @@ spawns new actors that go off perform some other flows based on their
 order data, on some other nodes, while our original actor then goes
 off and returns to the original node and effectively loops:
 
-			    +----------+
+                            +----------+
                        +--->| Shipping |
-	+-----------+  |    +----------+       +--------+
+        +-----------+  |    +----------+       +--------+
         | Inventory | -+---------------------> | Orders |
-	+-----------+  |    +------------+     +--------+
+        +-----------+  |    +------------+     +--------+
                        +--->| Backorders |
- 			    +------------+
+                            +------------+
 
 We can actually write a single linear program, with code being evaluated
 on multiple machines, and multiple tasks being run in parallel on multiple
