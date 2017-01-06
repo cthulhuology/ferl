@@ -1,17 +1,10 @@
 -module(ferl).
 
--export([ run/1, eval/4 ]).
+-export([ eval/4, start/0, start/1 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Publics 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Runs the script
-run(Script) when is_binary(Script) ->
-	run(binary:bin_to_list(Script));
-run(Script) when is_list(Script) ->
-	Words = string:tokens(Script," \n\t"),
-	eval(Words,[],[],[]).
 
 %% terminate evaluation
 eval([], Data, [], Dictionary) ->
@@ -86,8 +79,22 @@ eval([ Op | Cont ],Data,Return,Dictionary) ->
 			io:format("Calling ~p ~n", [ Op ]),
 			eval(Fun, Data, [ Cont | Return ], Dictionary);
 		none -> 
-			eval(Cont, [ list_to_integer(Op) | Data ], Return, Dictionary)
+			eval(Cont, [ Op | Data ], Return, Dictionary)
 	end.
+
+start(Pid) ->
+	F = fun(F,Data,Dictionary) ->
+		receive 
+			Msg -> 
+				{ Data2, Dictionary2 } = eval(Msg,Data,[],Dictionary),
+				Pid ! { Data2 }
+		end,
+		F(F,Data2,Dictionary2)
+	end,
+	spawn(fun() -> F(F,[],[]) end).
+
+start() ->
+	start(self()).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Internals 
